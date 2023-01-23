@@ -11,7 +11,7 @@ import { useSelector } from "react-redux";
 function App() {
   const [users, setUsers] = useState(null);
   const { user } = useSelector((state) => state.Auth);
-  console.log("users is", users);
+  // console.log("users is", users);
   useEffect(() => {
     const myuser = JSON.parse(sessionStorage.getItem("user"));
     setUsers({

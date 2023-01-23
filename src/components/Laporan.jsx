@@ -1,6 +1,32 @@
-import React from "react";
+import React, { useEffect, useState, Fragment } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getlaporan } from "../redux/actions/Laporan";
+import { Dialog, Transition } from "@headlessui/react";
 
 const Laporan = () => {
+  const dispatch = useDispatch();
+  const { laporan } = useSelector((state) => state.laporan);
+  const [length, setLength] = useState();
+  const [details, setDetails] = useState();
+
+  let [isOpen, setIsOpen] = useState(false);
+  function closeModal() {
+    setIsOpen(false);
+  }
+  function openModal() {
+    setIsOpen(true);
+  }
+
+  const detail = (e) => {
+    const filter = laporan && laporan.filter((data) => data.id === e);
+    setDetails(filter);
+    openModal();
+  };
+
+  useEffect(() => {
+    dispatch(getlaporan());
+  }, []);
+
   return (
     <div>
       <div className="flex items-center space-x-2">
@@ -25,16 +51,16 @@ const Laporan = () => {
           <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
               <th scope="col" class="px-6 py-3">
-                Product name
+                ID_Transaksi
               </th>
               <th scope="col" class="px-6 py-3">
-                Color
+                jenis transaksi
               </th>
               <th scope="col" class="px-6 py-3">
-                Category
+                tanggal transaksi
               </th>
               <th scope="col" class="px-6 py-3">
-                Price
+                Total transaksi
               </th>
               <th scope="col" class="px-6 py-3">
                 Action
@@ -42,103 +68,137 @@ const Laporan = () => {
             </tr>
           </thead>
           <tbody>
-            <tr class="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
-              <th
-                scope="row"
-                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Apple MacBook Pro 17"
-              </th>
-              <td class="px-6 py-4">Sliver</td>
-              <td class="px-6 py-4">Laptop</td>
-              <td class="px-6 py-4">$2999</td>
-              <td class="px-6 py-4">
-                <a
-                  href="#"
-                  class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                >
-                  Edit
-                </a>
-              </td>
-            </tr>
-            <tr class="border-b bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-              <th
-                scope="row"
-                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Microsoft Surface Pro
-              </th>
-              <td class="px-6 py-4">White</td>
-              <td class="px-6 py-4">Laptop PC</td>
-              <td class="px-6 py-4">$1999</td>
-              <td class="px-6 py-4">
-                <a
-                  href="#"
-                  class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                >
-                  Edit
-                </a>
-              </td>
-            </tr>
-            <tr class="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
-              <th
-                scope="row"
-                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Magic Mouse 2
-              </th>
-              <td class="px-6 py-4">Black</td>
-              <td class="px-6 py-4">Accessories</td>
-              <td class="px-6 py-4">$99</td>
-              <td class="px-6 py-4">
-                <a
-                  href="#"
-                  class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                >
-                  Edit
-                </a>
-              </td>
-            </tr>
-            <tr class="border-b bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-              <th
-                scope="row"
-                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Google Pixel Phone
-              </th>
-              <td class="px-6 py-4">Gray</td>
-              <td class="px-6 py-4">Phone</td>
-              <td class="px-6 py-4">$799</td>
-              <td class="px-6 py-4">
-                <a
-                  href="#"
-                  class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                >
-                  Edit
-                </a>
-              </td>
-            </tr>
-            <tr>
-              <th
-                scope="row"
-                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Apple Watch 5
-              </th>
-              <td class="px-6 py-4">Red</td>
-              <td class="px-6 py-4">Wearables</td>
-              <td class="px-6 py-4">$999</td>
-              <td class="px-6 py-4">
-                <a
-                  href="#"
-                  class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                >
-                  Edit
-                </a>
-              </td>
-            </tr>
+            {laporan &&
+              laporan.map((data) => {
+                return (
+                  <tr class="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
+                    <th
+                      scope="row"
+                      class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                    >
+                      {data.id}
+                    </th>
+                    <td class="px-6 py-4">{data.jenis_transaksi}</td>
+                    <td class="px-6 py-4">{data.tanggal_transaksi}</td>
+                    <td class="px-6 py-4">{data.total_transaksi}</td>
+                    <td class="px-6 py-4">
+                      <p
+                        onClick={() => detail(data.id)}
+                        class="font-medium text-blue-600 dark:text-blue-500 hover:underline cursor-pointer"
+                      >
+                        Detail
+                      </p>
+                    </td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
+      </div>
+      <div>
+        {details &&
+          details.map((data) => {
+            const barangs = data.barang;
+            // console.log("barangs", barangs);
+            return (
+              <Transition appear show={isOpen} as={Fragment}>
+                <Dialog as="div" className="relative z-10" onClose={closeModal}>
+                  <Transition.Child
+                    as={Fragment}
+                    enter="ease-out duration-300"
+                    enterFrom="opacity-0"
+                    enterTo="opacity-100"
+                    leave="ease-in duration-200"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                  >
+                    <div className="fixed inset-0 bg-black bg-opacity-25" />
+                  </Transition.Child>
+
+                  <div className="fixed inset-0 overflow-y-auto">
+                    <div className="flex min-h-full items-center justify-center p-4 text-center">
+                      <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0 scale-95"
+                        enterTo="opacity-100 scale-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100 scale-100"
+                        leaveTo="opacity-0 scale-95"
+                      >
+                        <Dialog.Panel className="w-[68%] transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                          <div>
+                            <p className="mt-2">id transaksi : {data.id}</p>
+                            <p className="mt-2">
+                              tanggal transaksi : {data.tanggal_transaksi}
+                            </p>
+                            <p className="mt-2">
+                              jenis transaksi : {data.jenis_transaksi}
+                            </p>
+                            <p className="mt-2">
+                              total transaksi : Rp. {data.total_transaksi}
+                            </p>
+                          </div>
+                          <div>
+                            <div className="mt-4">
+                              <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                  <tr>
+                                    <th scope="col" class="px-6 py-3">
+                                      nama barang
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                      kode barang
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                      harga barang
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                      qty
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                      total
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {barangs &&
+                                    barangs.map((data) => {
+                                      return (
+                                        <tr class="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
+                                          <th
+                                            scope="row"
+                                            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                          >
+                                            {data.data.nama_barang}
+                                          </th>
+                                          <td className="px-6 py-4">
+                                            {data.data.kode_barang}
+                                          </td>
+                                          <td className="px-6 py-4">
+                                            {data.data.harga_jual}
+                                          </td>
+                                          <td className="px-6 py-4">
+                                            {data.qty}
+                                          </td>
+                                          <td className="px-6 py-4">
+                                            {data.semua}
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </Dialog.Panel>
+                      </Transition.Child>
+                    </div>
+                  </div>
+                </Dialog>
+              </Transition>
+            );
+          })}
       </div>
     </div>
   );

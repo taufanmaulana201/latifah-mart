@@ -11,7 +11,7 @@ const Dashboard = () => {
   const [dashboardactive, setDashboardactive] = useState(0);
   // console.log(dashboardactive);
   return (
-    <div className="flex">
+    <div className="flex min-h-screen">
       <div className="w-[15%] ">
         <div className="space-x-4 p-2 flex items-center justify-center flex-col">
           <img className="w-[120px] h-[120px]" src={logo} alt="" />
@@ -171,28 +171,6 @@ const Dashboard = () => {
               </svg>
             </div>
             <p>Laporan</p>
-          </div>
-          <div
-            onClick={() => setDashboardactive(6)}
-            className={` flex px-2 h-8 items-center cursor-pointer ${
-              dashboardactive === 6 ? "bg-slate-200" : ""
-            }`}
-          >
-            <div className="mr-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="1em"
-                height="1em"
-                preserveAspectRatio="xMidYMid meet"
-                viewBox="0 0 16 16"
-              >
-                <path
-                  fill="currentColor"
-                  d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v4h10V2a1 1 0 0 0-1-1H4zm9 6h-3v2h3V7zm0 3h-3v2h3v-2zm0 3h-3v2h2a1 1 0 0 0 1-1v-1zm-4 2v-2H6v2h3zm-4 0v-2H3v1a1 1 0 0 0 1 1h1zm-2-3h2v-2H3v2zm0-3h2V7H3v2zm3-2v2h3V7H6zm3 3H6v2h3v-2z"
-                />
-              </svg>
-            </div>
-            <p>Laba Rugi</p>
           </div>
         </div>
       </div>

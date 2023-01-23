@@ -1,22 +1,68 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addsuplier,
+  deletesuplier,
+  getsuplier,
+} from "../redux/actions/suplier";
+import { trash } from "../assets/icons/icons";
 
 const Suplier = () => {
+  const dispatch = useDispatch();
+  const { suplier, detail } = useSelector((state) => state.suplier);
+  // console.log(suplier);
   // modal add controller
   let [isOpen, setIsOpen] = useState(false);
   function closeModal() {
     setIsOpen(false);
   }
-
   function openModal() {
     setIsOpen(true);
   }
-  const handlechange = (e) =>{
-    console.log(e);
-  }
+  const [formdata, setFormdata] = useState({
+    alamat: "",
+    catatan: "",
+    email: "",
+    hp: null,
+    nama_suplier: "",
+  });
+  const handlechange = (e) => {
+    const { name, value } = e.target;
+    setFormdata({
+      ...formdata,
+      [name]: value,
+    });
+  };
+  const { alamat, catatan, email, hp, nama_suplier } = formdata;
+  const handlesubmit = (e) => {
+    e.preventDefault();
+    dispatch(addsuplier(alamat, catatan, email, hp, nama_suplier));
+    setFormdata({
+      alamat: "",
+      catatan: "",
+      email: "",
+      hp: null,
+      nama_suplier: "",
+    });
+    getdata();
+    closeModal();
+  };
+  const handledelete = (id) => {
+    dispatch(deletesuplier(id));
+    getdata();
+  };
+
+  const getdata = () => {
+    dispatch(getsuplier());
+  };
+  useEffect(() => {
+    getdata();
+  }, []);
 
   return (
     <div>
+      <div></div>
       <div className="flex items-center space-x-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -44,20 +90,23 @@ const Suplier = () => {
         <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
-              <th scope="col" className="px-6 py-3" >
-                No Transaksi
+              <th scope="col" className="px-6 py-3">
+                ID Suplier
               </th>
               <th scope="col" className="px-6 py-3">
-                Tanggal Tansaksi
+                Nama Suplier
               </th>
               <th scope="col" className="px-6 py-3">
-                Customer
+                Alamat
               </th>
-              <th scope="col" className="px-6 py-3" >
+              <th scope="col" className="px-6 py-3">
+                Email
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Hp
+              </th>
+              <th scope="col" className="px-6 py-3">
                 Catatan
-              </th>
-              <th scope="col" className="px-6 py-3" >
-                Status
               </th>
               <th scope="col" className="px-6 py-3">
                 Action
@@ -65,26 +114,35 @@ const Suplier = () => {
             </tr>
           </thead>
           <tbody>
-            <tr className="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
-              <th
-                scope="row"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Apple MacBook Pro 17"
-              </th>
-              <td className="px-6 py-4">Sliver</td>
-              <td className="px-6 py-4">Laptop</td>
-              <td className="px-6 py-4">$2999</td>
-              <td className="px-6 py-4">asdasd</td>
-              <td className="px-6 py-4">
-                <a
-                  href="#"
-                  className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                >
-                  Detail
-                </a>
-              </td>
-            </tr>
+            {suplier &&
+              suplier.map((data) => {
+                return (
+                  <tr
+                    key={data.id}
+                    className="bg-white border-b dark:bg-gray-900 dark:border-gray-700"
+                  >
+                    <td className="px-6 py-4">{data.id}</td>
+                    <th
+                      scope="row"
+                      className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                    >
+                      {data.nama_suplier}
+                    </th>
+                    <td className="px-6 py-4">{data.alamat}</td>
+                    <td className="px-6 py-4">{data.email}</td>
+                    <td className="px-6 py-4">{data.hp}</td>
+                    <td className="px-6 py-4">{data.catatan}</td>
+                    <td className="px-6 py-4">
+                      <div
+                        onClick={() => handledelete(data.id)}
+                        className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                      >
+                        {trash}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>
@@ -115,10 +173,10 @@ const Suplier = () => {
               >
                 <Dialog.Panel className=" w-[500px] transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                   <div>
-                    <form>
+                    <form onSubmit={handlesubmit}>
                       <div className="mb-6">
                         <label
-                          for="jenis"
+                          for="nama"
                           className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                         >
                           Nama Suplier
@@ -126,13 +184,14 @@ const Suplier = () => {
                         <input
                           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                           type="text"
-                          name="jenis"
-                          id="jenis"
+                          name="nama_suplier"
+                          onChange={handlechange}
+                          id="nama"
                         />
                       </div>
                       <div className="mb-6">
                         <label
-                          for="jenis"
+                          for="email"
                           className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                         >
                           E-mail
@@ -140,13 +199,14 @@ const Suplier = () => {
                         <input
                           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                           type="email"
-                          name="jenis"
-                          id="jenis"
+                          name="email"
+                          onChange={handlechange}
+                          id="email"
                         />
                       </div>
                       <div className="mb-6">
                         <label
-                          for="total"
+                          for="hp"
                           className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                         >
                           Nomor Handpone
@@ -154,34 +214,38 @@ const Suplier = () => {
                         <input
                           className="w-[300px]bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                           type="number"
-                          name="total"
-                          id="total"
+                          name="hp"
+                          onChange={handlechange}
+                          id="hp"
                         />
                       </div>
                       <div className="mb-6">
                         <label
-                          for="total"
+                          for="alamat"
                           className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                         >
                           Alamat Suplier
                         </label>
                         <input
                           className="w-[300px]bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                          type="number"
-                          name="total"
-                          id="total"
+                          type="text"
+                          name="alamat"
+                          onChange={handlechange}
+                          id="alamat"
                         />
                       </div>
 
                       <div className="mb-6">
                         <label
-                          for="total"
+                          for="catatan"
                           className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                         >
                           Catatan
                         </label>
                         <textarea
                           id="catatan"
+                          name="catatan"
+                          onChange={handlechange}
                           rows="4"
                           className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         ></textarea>

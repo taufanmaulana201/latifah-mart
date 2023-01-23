@@ -1,4 +1,4 @@
-import { LOGIN_FAIL, LOGIN_SUCCESS, LOGGED_IN } from "../actions/auth";
+import { LOGIN_FAIL, LOGIN_SUCCESS } from "../actions/auth";
 
 const initstate = {
   loading: true,

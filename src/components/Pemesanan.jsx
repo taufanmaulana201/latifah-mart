@@ -1,17 +1,89 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { useDispatch, useSelector } from "react-redux";
+import { addpesanan, getpesanan } from "../redux/actions/pesanan";
 
 const Pemesanan = () => {
+  const [formdata, setFormdata] = useState({
+    alamat: "",
+    barang: null,
+    bayar: 0,
+    hp: 0,
+    nama_customer: "",
+    tanggal_transaksi: "",
+    total_transaksi: "",
+  });
+  const {
+    alamat,
+    barang,
+    bayar,
+    hp,
+    nama_customer,
+    tanggal_transaksi,
+    total_transaksi,
+  } = formdata;
+
+  const dispatch = useDispatch();
+  const { pesanan } = useSelector((state) => state.pesanan);
+  const barangku = useSelector((state) => state.barang.barang);
+  const [filtered, setFiltered] = useState(null);
+  const [terfilter, setTelfilter] = useState();
+  // console.log("pesanan", pesanan);
   // modal add controller
   let [isOpen, setIsOpen] = useState(false);
   function closeModal() {
     setIsOpen(false);
   }
-
   function openModal() {
     setIsOpen(true);
   }
+  let [isOpenedit, setIsOpenedit] = useState(false);
+  function closeModaledit() {
+    setIsOpenedit(false);
+  }
+  function openModaledit() {
+    setIsOpenedit(true);
+  }
 
+  const handleedit = (e) => {
+    alert(e);
+  };
+  const handledetail = (e) => {
+    const filter = pesanan && pesanan.filter((data) => data.id === e);
+    setFiltered(filter);
+    setIsOpenedit(true);
+  };
+
+  // fungsi
+  const searchbarang = (e) => {
+    const { value } = e.target;
+    const filter = barangku.filter(
+      (data) => data.nama_barang === value || data.kode_barang === value
+    );
+    setTelfilter(filter);
+  };
+  const tambahcart = (e) => {
+    e.preventdefault();
+  };
+
+  const buattrasnsaksi = () => {
+    // dispatch(
+    //   addpesanan(
+    //     alamat,
+    //     barang,
+    //     bayar,
+    //     hp,
+    //     nama_customer,
+    //     tanggal_transaksi,
+    //     total_transaksi
+    //   )
+    // );
+  };
+
+  useEffect(() => {
+    dispatch(getpesanan());
+  }, []);
+  console.log("filtered", filtered);
   return (
     <div>
       <div className="flex items-center space-x-2">
@@ -62,26 +134,49 @@ const Pemesanan = () => {
             </tr>
           </thead>
           <tbody>
-            <tr className="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
-              <th
-                scope="row"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Apple MacBook Pro 17"
-              </th>
-              <td className="px-6 py-4">Sliver</td>
-              <td className="px-6 py-4">Laptop</td>
-              <td className="px-6 py-4">$2999</td>
-              <td className="px-6 py-4">asdasd</td>
-              <td className="px-6 py-4">
-                <a
-                  href="#"
-                  className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                >
-                  Detail
-                </a>
-              </td>
-            </tr>
+            {pesanan &&
+              pesanan.map((data) => {
+                return (
+                  <tr
+                    key={data.id}
+                    className="bg-white border-b dark:bg-gray-900 dark:border-gray-700"
+                  >
+                    <th
+                      scope="row"
+                      className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                    >
+                      {data.id}
+                    </th>
+                    <td className="px-6 py-4">{data.tanggal_transaksi}</td>
+                    <td className="px-6 py-4">{data.nama_customer}</td>
+                    <td className="px-6 py-4">{data.catatan}</td>
+                    <td className="px-6 py-4">
+                      <select name="status" id="status">
+                        <option selected value="prosess">
+                          prosess
+                        </option>
+                        <option selected value="selesai">
+                          selesai
+                        </option>
+                      </select>
+                    </td>
+                    <td className="px-6 py-4 flex space-x-2">
+                      <p
+                        onClick={() => handleedit(data.id)}
+                        className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                      >
+                        edit
+                      </p>
+                      <p
+                        onClick={() => handledetail(data.id)}
+                        className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                      >
+                        detail
+                      </p>
+                    </td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>
@@ -216,8 +311,14 @@ const Pemesanan = () => {
                                 type="text"
                                 name="searchbarang"
                                 id="searchbarang"
-                                onChange={() => {}}
+                                onChange={searchbarang}
                               />
+                              <div className="absolute mt-16 px-3 bg-slate-200 rounded-sm ">
+                                {terfilter &&
+                                  terfilter.map((data) => {
+                                    return <p>{data.nama_barang}</p>;
+                                  })}
+                              </div>
                               <p>qty</p>
                               <input
                                 className="w-[50px] h-[30px] bg-slate-200 rounded-sm px-1  "
@@ -228,7 +329,10 @@ const Pemesanan = () => {
                               />
                             </div>
                           </div>
-                          <button className="px-2 bg-blue-500 rounded h-[30px] hover:bg-blue-600 float-right mr-6 mt-3">
+                          <button
+                            onclick={tambahcart}
+                            className="px-2 bg-blue-500 rounded h-[30px] hover:bg-blue-600 float-right mr-6 mt-3"
+                          >
                             Tambah
                           </button>
                         </div>
@@ -276,7 +380,10 @@ const Pemesanan = () => {
                         </div>
                       </div>
 
-                      <button className="max-w-max float-right mt-14 px-3 h-[35px] bg-blue-500 text-white rounded hover:bg-blue-600">
+                      <button
+                        onClick={buattrasnsaksi}
+                        className="max-w-max float-right mt-14 px-3 h-[35px] bg-blue-500 text-white rounded hover:bg-blue-600"
+                      >
                         Buat Transaksi
                       </button>
                     </div>
@@ -370,6 +477,113 @@ const Pemesanan = () => {
           </div>
         </Dialog>
       </Transition>
+      {filtered &&
+        filtered.map((data) => {
+          const barangs = data.barang;
+          // console.log("barangs", barangs);
+          return (
+            <Transition appear show={isOpenedit} as={Fragment}>
+              <Dialog
+                as="div"
+                className="relative z-10"
+                onClose={closeModaledit}
+              >
+                <Transition.Child
+                  as={Fragment}
+                  enter="ease-out duration-300"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
+                  leave="ease-in duration-200"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                >
+                  <div className="fixed inset-0 bg-black bg-opacity-25" />
+                </Transition.Child>
+
+                <div className="fixed inset-0 overflow-y-auto">
+                  <div className="flex min-h-full items-center justify-center p-4 text-center">
+                    <Transition.Child
+                      as={Fragment}
+                      enter="ease-out duration-300"
+                      enterFrom="opacity-0 scale-95"
+                      enterTo="opacity-100 scale-100"
+                      leave="ease-in duration-200"
+                      leaveFrom="opacity-100 scale-100"
+                      leaveTo="opacity-0 scale-95"
+                    >
+                      <Dialog.Panel className="w-[68%] transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                        <div>
+                          <p className="mt-2">id transaksi : {data.id}</p>
+                          <p className="mt-2">
+                            tanggal transaksi : {data.tanggal_transaksi}
+                          </p>
+                          <p className="mt-2">
+                            jenis transaksi : {data.jenis_transaksi}
+                          </p>
+                          <p className="mt-2">
+                            total transaksi : Rp. {data.total_transaksi}
+                          </p>
+                        </div>
+                        <div>
+                          <div className="mt-4">
+                            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                              <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                <tr>
+                                  <th scope="col" class="px-6 py-3">
+                                    nama barang
+                                  </th>
+                                  <th scope="col" class="px-6 py-3">
+                                    kode barang
+                                  </th>
+                                  <th scope="col" class="px-6 py-3">
+                                    harga barang
+                                  </th>
+                                  <th scope="col" class="px-6 py-3">
+                                    qty
+                                  </th>
+                                  <th scope="col" class="px-6 py-3">
+                                    total
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {barangs &&
+                                  barangs.map((data) => {
+                                    return (
+                                      <tr class="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
+                                        <th
+                                          scope="row"
+                                          class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                        >
+                                          {data.data.nama_barang}
+                                        </th>
+                                        <td className="px-6 py-4">
+                                          {data.data.kode_barang}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                          {data.data.harga_jual}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                          {data.qty}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                          {data.semua}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </Dialog.Panel>
+                    </Transition.Child>
+                  </div>
+                </div>
+              </Dialog>
+            </Transition>
+          );
+        })}
     </div>
   );
 };

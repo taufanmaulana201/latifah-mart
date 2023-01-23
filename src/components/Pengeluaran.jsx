@@ -1,16 +1,62 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { useDispatch, useSelector } from "react-redux";
+import { trash } from "../assets/icons/icons";
+import {
+  addpengeluaran,
+  deletepengeluaran,
+  getpengeluaran,
+} from "../redux/actions/pengeluaran";
 
 const Pengeluaran = () => {
+  const dispatch = useDispatch();
+  const { pengeluaran, detail } = useSelector((state) => state.pengeluaran);
   // modal add controller
   let [isOpen, setIsOpen] = useState(false);
   function closeModal() {
     setIsOpen(false);
   }
-
   function openModal() {
     setIsOpen(true);
   }
+  const [formdata, setFormdata] = useState({
+    tanggal_pengeluaran: null,
+    jenis_pengeluaran: "",
+    total: null,
+    catatan: "",
+  });
+  const { tanggal_pengeluaran, jenis_pengeluaran, total, catatan } = formdata;
+  const handlechange = (e) => {
+    const { name, value } = e.target;
+    setFormdata({
+      ...formdata,
+      [name]: value,
+    });
+  };
+  const handlesubmit = (e) => {
+    e.preventDefault();
+    dispatch(
+      addpengeluaran(tanggal_pengeluaran, jenis_pengeluaran, total, catatan)
+    );
+    setFormdata({
+      tanggal_pengeluaran: null,
+      jenis_pengeluaran: "",
+      total: null,
+      catatan: "",
+    });
+    dispatch(getpengeluaran());
+    closeModal();
+  };
+  const handledelete = (id) => {
+    dispatch(deletepengeluaran(id));
+    getdata();
+  };
+  const getdata = () => {
+    dispatch(getpengeluaran());
+  };
+  useEffect(() => {
+    getdata();
+  }, []);
 
   return (
     <div>
@@ -42,19 +88,19 @@ const Pengeluaran = () => {
           <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
               <th scope="col" className="px-6 py-3">
-                No Transaksi
+                Id Pengeluaran
               </th>
               <th scope="col" className="px-6 py-3">
-                Tanggal Tansaksi
+                Jenis Pengeluaran
               </th>
               <th scope="col" className="px-6 py-3">
-                Customer
+                Tanggal Pengeluaran
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Total Pengeluaran
               </th>
               <th scope="col" className="px-6 py-3">
                 Catatan
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Status
               </th>
               <th scope="col" className="px-6 py-3">
                 Action
@@ -62,26 +108,34 @@ const Pengeluaran = () => {
             </tr>
           </thead>
           <tbody>
-            <tr className="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
-              <th
-                scope="row"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Apple MacBook Pro 17"
-              </th>
-              <td className="px-6 py-4">Sliver</td>
-              <td className="px-6 py-4">Laptop</td>
-              <td className="px-6 py-4">$2999</td>
-              <td className="px-6 py-4">asdasd</td>
-              <td className="px-6 py-4">
-                <a
-                  href="#"
-                  className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                >
-                  Detail
-                </a>
-              </td>
-            </tr>
+            {pengeluaran &&
+              pengeluaran.map((data) => {
+                return (
+                  <tr
+                    key={data.id}
+                    className="bg-white border-b dark:bg-gray-900 dark:border-gray-700"
+                  >
+                    <td className="px-6 py-4">{data.id}</td>
+                    <th
+                      scope="row"
+                      className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                    >
+                      {data.jenis_pengeluaran}
+                    </th>
+                    <td className="px-6 py-4">{data.tanggal_pengeluaran}</td>
+                    <td className="px-6 py-4">{data.total}</td>
+                    <td className="px-6 py-4">{data.catatan}</td>
+                    <td className="px-6 py-4">
+                      <div
+                        onClick={() => handledelete(data.id)}
+                        className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                      >
+                        {trash}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>
@@ -112,7 +166,7 @@ const Pengeluaran = () => {
               >
                 <Dialog.Panel className="w-[500px] transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                   <div>
-                    <form>
+                    <form onSubmit={handlesubmit}>
                       <div className="mb-6">
                         <label
                           for="date"
@@ -123,7 +177,8 @@ const Pengeluaran = () => {
                         <input
                           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                           type="date"
-                          name="date"
+                          name="tanggal_pengeluaran"
+                          onChange={handlechange}
                           id="date"
                         />
                       </div>
@@ -137,7 +192,8 @@ const Pengeluaran = () => {
                         <input
                           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                           type="text"
-                          name="jenis"
+                          name="jenis_pengeluaran"
+                          onChange={handlechange}
                           id="jenis"
                         />
                       </div>
@@ -152,6 +208,7 @@ const Pengeluaran = () => {
                           className="w-[300px]bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                           type="number"
                           name="total"
+                          onChange={handlechange}
                           id="total"
                         />
                       </div>
@@ -164,6 +221,8 @@ const Pengeluaran = () => {
                         </label>
                         <textarea
                           id="catatan"
+                          name="catatan"
+                          onChange={handlechange}
                           rows="4"
                           className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         ></textarea>

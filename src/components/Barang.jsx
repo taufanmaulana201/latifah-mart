@@ -1,7 +1,111 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addbarang,
+  deletebarang,
+  getbarang,
+  getdetail,
+  upadtebarang,
+} from "../redux/actions/Barang";
+import { edit, trash } from "../assets/icons/icons";
+import { useNavigate } from "react-router-dom";
 
 const Barang = () => {
+  const dispatch = useDispatch();
+  const { barang, detail } = useSelector((state) => state.barang);
+  const mysuplier = useSelector((state) => state.suplier.suplier);
+  const navigate = useNavigate();
+  const [formdata, setFormdata] = useState({
+    kode_barang: "",
+    nama_barang: "",
+    stok: 0,
+    harga_jual: 0,
+    suplier: null,
+    catatan: "",
+  });
+  // const [Formupdate, setFormupdate] = useState({
+  //   kode_barang: "",
+  //   nama_barang: "",
+  //   stok: 0,
+  //   harga_jual: 0,
+  //   suplier: null,
+  //   catatan: "",
+  // });
+
+  const handlechange = (e) => {
+    const { name, value } = e.target;
+    setFormdata({
+      ...formdata,
+      [name]: value,
+    });
+  };
+  // const changeupdate = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormupdate({
+  //     ...formdata,
+  //     [name]: value,
+  //   });
+  // };
+
+  const { kode_barang, nama_barang, stok, harga_jual, suplier, catatan } =
+    formdata;
+  // console.log("sample", kode_barang);
+
+  const handlesubmit = (e) => {
+    e.preventDefault();
+    dispatch(
+      addbarang(kode_barang, nama_barang, stok, harga_jual, suplier, catatan)
+    );
+    dispatch(getbarang());
+    setFormdata({
+      kode_barang: "",
+      nama_barang: "",
+      stok: 0,
+      harga_jual: 0,
+      suplier: null,
+      catatan: "",
+    });
+  };
+
+  const handledelete = (id) => {
+    dispatch(deletebarang(id));
+    dispatch(getbarang());
+  };
+  const [idedit, setIdedit] = useState("");
+  const handledit = (e) => {
+    setUpdate(true);
+    setIdedit(e);
+    barang &&
+      barang
+        .filter((data) => data.id === idedit)
+        .map((data) => {
+          setFormdata({
+            kode_barang: data.kode_barang,
+            nama_barang: data.nama_barang,
+            stok: data.stok,
+            harga_jual: data.harga_jual,
+            suplier: data.suplier,
+            catatan: data.catatan,
+          });
+        });
+  };
+  const handleupdate = (e) => {
+    e.preventDefault();
+    dispatch(
+      upadtebarang(
+        idedit,
+        kode_barang,
+        nama_barang,
+        stok,
+        harga_jual,
+        suplier,
+        catatan
+      )
+    );
+    dispatch(getbarang());
+  };
+
   // modal add controller
   let [isOpen, setIsOpen] = useState(false);
   function closeModal() {
@@ -11,6 +115,16 @@ const Barang = () => {
   function openModal() {
     setIsOpen(true);
   }
+  let [isUpdate, setUpdate] = useState(false);
+  function closeModalUpdate() {
+    setUpdate(false);
+  }
+  // redux
+
+  // console.log("barang", barang);
+  useEffect(() => {
+    dispatch(getbarang());
+  }, []);
 
   return (
     <div>
@@ -42,19 +156,22 @@ const Barang = () => {
           <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
               <th scope="col" className="px-6 py-3">
-                No Transaksi
+                ID Barang
               </th>
               <th scope="col" className="px-6 py-3">
-                Tanggal Tansaksi
+                Kode Barang
               </th>
               <th scope="col" className="px-6 py-3">
-                Customer
+                nama barang
+              </th>
+              <th scope="col" className="px-6 py-3">
+                stok barang
               </th>
               <th scope="col" className="px-6 py-3">
                 Catatan
               </th>
               <th scope="col" className="px-6 py-3">
-                Status
+                suplier
               </th>
               <th scope="col" className="px-6 py-3">
                 Action
@@ -62,26 +179,41 @@ const Barang = () => {
             </tr>
           </thead>
           <tbody>
-            <tr className="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
-              <th
-                scope="row"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Apple MacBook Pro 17"
-              </th>
-              <td className="px-6 py-4">Sliver</td>
-              <td className="px-6 py-4">Laptop</td>
-              <td className="px-6 py-4">$2999</td>
-              <td className="px-6 py-4">asdasd</td>
-              <td className="px-6 py-4">
-                <a
-                  href="#"
-                  className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                >
-                  Detail
-                </a>
-              </td>
-            </tr>
+            {barang ? (
+              barang.map((data) => {
+                return (
+                  <tr className="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
+                    <td className="px-6 py-4">{data.id}</td>
+                    <td className="px-6 py-4">{data.kode_barang}</td>
+                    <th
+                      scope="row"
+                      className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                    >
+                      {data.nama_barang}
+                    </th>
+                    <td className="px-6 py-4">{data.stok}</td>
+                    <td className="px-6 py-4">{data.harga_jual}</td>
+                    <td className="px-6 py-4">{data.suplier}</td>
+                    <td className="px-6 py-4 flex items-center space-x-2">
+                      <div
+                        className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                        onClick={() => handledit(data.id)}
+                      >
+                        {edit}
+                      </div>
+                      <div
+                        onClick={() => handledelete(data.id)}
+                        className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                      >
+                        {trash}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <div>Loading.....</div>
+            )}
           </tbody>
         </table>
       </div>
@@ -112,40 +244,26 @@ const Barang = () => {
               >
                 <Dialog.Panel className="w-full w-[500px] transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                   <div>
-                    <form>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="mb-6">
-                          <label
-                            for="date"
-                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                          >
-                            Tanggal
-                          </label>
-                          <input
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            type="date"
-                            name="date"
-                            id="date"
-                          />
-                        </div>
-                        <div>
-                          <label
-                            for="jenis"
-                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                          >
-                            Kode Barang
-                          </label>
-                          <input
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            type="text"
-                            name="jenis"
-                            id="jenis"
-                          />
-                        </div>
+                    <form onSubmit={handlesubmit}>
+                      <div>
+                        <label
+                          for="kode_barang"
+                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        >
+                          Kode Barang
+                        </label>
+                        <input
+                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                          type="text"
+                          name="kode_barang"
+                          id="kode_barang"
+                          onChange={handlechange}
+                        />
                       </div>
+
                       <div className="mb-6">
                         <label
-                          for="jenis"
+                          for="nama_barang"
                           className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                         >
                           Nama Barang
@@ -153,37 +271,42 @@ const Barang = () => {
                         <input
                           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                           type="text"
-                          name="jenis"
-                          id="jenis"
+                          name="nama_barang"
+                          id="nama_barang"
+                          onChange={handlechange}
                         />
                       </div>
-                      <div className="mb-6">
-                        <label
-                          for="total"
-                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                        >
-                          Stok Barang
-                        </label>
-                        <input
-                          className="w-[300px]bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[150px] p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                          type="number"
-                          name="total"
-                          id="total"
-                        />
-                      </div>
-                      <div className="mb-6">
-                        <label
-                          for="total"
-                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                        >
-                          Harga Jual
-                        </label>
-                        <input
-                          className="w-[300px]bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[150px] p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                          type="number"
-                          name="total"
-                          id="total"
-                        />
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="">
+                          <label
+                            for="stok"
+                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >
+                            Stok Barang
+                          </label>
+                          <input
+                            className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            type="number"
+                            name="stok"
+                            id="stok"
+                            onChange={handlechange}
+                          />
+                        </div>
+                        <div className="">
+                          <label
+                            for="harga_jual"
+                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >
+                            Harga Jual
+                          </label>
+                          <input
+                            className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            type="number"
+                            name="harga_jual"
+                            id="harga_jual"
+                            onChange={handlechange}
+                          />
+                        </div>
                       </div>
                       <div className="mb-6">
                         <label
@@ -193,35 +316,195 @@ const Barang = () => {
                           Suplier
                         </label>
                         <select
-                          id="countries"
+                          id="suplier"
+                          name="suplier"
+                          onChange={handlechange}
+                          defaultValue=""
                           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         >
                           <option selected>Pilih Suplier</option>
-                          <option value="US">A</option>
-                          <option value="CA">B</option>
-                          <option value="FR">C</option>
-                          <option value="DE">D</option>
+                          {mysuplier &&
+                            mysuplier.map((data) => {
+                              return (
+                                <option key={data.id} value={data.nama_suplier}>
+                                  {data.nama_suplier}
+                                </option>
+                              );
+                            })}
                         </select>
                       </div>
                       <div className="mb-6">
                         <label
-                          for="total"
+                          for="catatan"
                           className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                         >
                           Catatan
                         </label>
                         <textarea
                           id="catatan"
+                          name="catatan"
+                          onChange={handlechange}
                           rows="4"
                           className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         ></textarea>
                       </div>
 
                       <button
+                        onClick={closeModal}
                         type="submit"
                         class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                       >
-                        Tambah Pengeluaran
+                        Tambah Barang
+                      </button>
+                    </form>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+      <Transition appear show={isUpdate} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={closeModalUpdate}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full w-[500px] transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <div>
+                    <form onSubmit={handleupdate}>
+                      <div>
+                        <label
+                          for="kode_barang"
+                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        >
+                          Kode Barang
+                        </label>
+                        <input
+                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                          type="text"
+                          name="kode_barang"
+                          id="kode_barang"
+                          value={kode_barang}
+                          onChange={handlechange}
+                        />
+                      </div>
+
+                      <div className="mb-6">
+                        <label
+                          for="nama_barang"
+                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        >
+                          Nama Barang
+                        </label>
+                        <input
+                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                          type="text"
+                          name="nama_barang"
+                          id="nama_barang"
+                          value={nama_barang}
+                          onChange={handlechange}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="">
+                          <label
+                            for="stok"
+                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >
+                            Stok Barang
+                          </label>
+                          <input
+                            className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            type="number"
+                            name="stok"
+                            id="stok"
+                            value={stok}
+                            onChange={handlechange}
+                          />
+                        </div>
+                        <div className="">
+                          <label
+                            for="harga_jual"
+                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >
+                            Harga Jual
+                          </label>
+                          <input
+                            className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            type="number"
+                            name="harga_jual"
+                            id="harga_jual"
+                            value={harga_jual}
+                            onChange={handlechange}
+                          />
+                        </div>
+                      </div>
+                      <div className="mb-6">
+                        <label
+                          for="jenis"
+                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        >
+                          Suplier
+                        </label>
+                        <select
+                          id="suplier"
+                          name="suplier"
+                          onChange={handlechange}
+                          defaultValue=""
+                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        >
+                          <option selected value={suplier}>
+                            {suplier}
+                          </option>
+                          <option value="A">A</option>
+                          <option value="B">B</option>
+                          <option value="C">C</option>
+                          <option value="D">D</option>
+                        </select>
+                      </div>
+                      <div className="mb-6">
+                        <label
+                          for="catatan"
+                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        >
+                          Catatan
+                        </label>
+                        <textarea
+                          id="catatan"
+                          name="catatan"
+                          onChange={handlechange}
+                          rows="4"
+                          value={catatan}
+                          className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        ></textarea>
+                      </div>
+
+                      <button
+                        onClick={closeModalUpdate}
+                        type="submit"
+                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                      >
+                        Edit Barang
                       </button>
                     </form>
                   </div>

@@ -1,30 +1,61 @@
 import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { addlaporan } from "../redux/actions/Laporan";
 
 const Penjualan = () => {
-  const [formdata, setFormdata] = useState({
-    notrnsaksi: "",
-    tanggal: "",
-    total: "",
-    barang: [],
-  });
-  const [total, setTotal] = useState(0);
+  const dispatch = useDispatch();
+  const { barang } = useSelector((state) => state.barang);
+  const [Totaltransaksi, setTotaltransaksi] = useState([]);
   const [bayar, setBayar] = useState(0);
-  const [Kembalian, setKembalian] = useState(0);
+  const [filter, setFilter] = useState();
+  const [cart, setCart] = useState([]);
+  const [Qty, setQty] = useState(1);
+  const [tgl, setTgl] = useState("");
+
+  let sum =
+    Totaltransaksi &&
+    Totaltransaksi.reduce(function (nilaisebelum, nilaisesudah) {
+      return nilaisebelum + nilaisesudah;
+    }, 0);
 
   const handlechange = (e) => {
     const { name, value } = e.target;
-    console.log(name, value);
+    // console.log("bayar : ", value - sum);
+    setBayar(value - sum);
   };
-  const dummybarang = [
-    {
-      nama: "barang",
-      harga: 15000,
-    },
-    {
-      nama: "barang lagi",
-      harga: 17000,
-    },
-  ];
+
+  const searchbarang = (e) => {
+    const { value } = e.target;
+    const filter = barang.filter(
+      (data) => data.nama_barang === value || data.kode_barang === value
+    );
+    setFilter(filter);
+  };
+  const deletecart = (e, value) => {
+    const newcart = cart.filter((data) => data.data.id !== e);
+    setCart(newcart);
+  };
+  const tambahbarang = (e) => {
+    e.preventDefault();
+    filter &&
+      filter.map((data) => {
+        // setTotal(data.harga_jual * Qty);
+        const datayangditambahkan = {
+          data: data,
+          qty: Qty,
+          semua: data.harga_jual * Qty,
+        };
+        setCart((current) => [...current, datayangditambahkan]);
+        const harga = data.harga_jual * Qty;
+        setTotaltransaksi((current) => [...current, harga]);
+      });
+  };
+
+  const handletmbah = (e) => {
+    dispatch(addlaporan(tgl, cart, sum, bayar));
+    alert("transaksi berhasil");
+  };
+
   return (
     <div>
       <div className="flex items-center space-x-2">
@@ -51,29 +82,14 @@ const Penjualan = () => {
             <div className=" px-1 w-[150px] rounded-sm font-bold h-[30px] pt-1">
               DATA TRANSAKSI
             </div>
-
             <div>
-              <div className="flex">
-                <div className="font-semibold w-[35%]">No Transaksi</div>
-                <div className="">
-                  <div className="">
-                    <input
-                      onChange={handlechange}
-                      className="max-w-max h-[30px] bg-slate-200 rounded-sm px-1 "
-                      type="number"
-                      name="notransaksi"
-                      id="notransaksi"
-                    />
-                  </div>
-                </div>
-              </div>
               <div className="flex">
                 <div className="font-semibold w-[35%] mt-3">
                   Tanggal Transaksi
                 </div>
                 <div className="">
                   <input
-                    onChange={handlechange}
+                    onChange={(e) => setTgl(e.target.value)}
                     type="date"
                     name="tanggal"
                     id="tanggal"
@@ -89,25 +105,35 @@ const Penjualan = () => {
             <div>
               <div className="flex">
                 <div className="font-semibold w-[35%]">Nama Barang</div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 relative">
                   <input
-                    onChange={handlechange}
+                    onChange={searchbarang}
                     className="max-w-max h-[30px] bg-slate-200 rounded-sm px-1 "
                     type="text"
                     name="searchbarang"
                     id="searchbarang"
                   />
+                  <div className="absolute mt-16 px-3 max-w-max bg-slate-400 rounded-sm">
+                    {filter &&
+                      filter.map((data) => {
+                        return <div key={data.id}>{data.nama_barang}</div>;
+                      })}
+                  </div>
                   <p>qty</p>
                   <input
-                    className="w-[50px] h-[30px] bg-slate-200 rounded-sm px-1  "
+                    className="w-[50px] h-[30px] bg-slate-200 rounded-sm px-1 text-center "
                     type="number"
                     name="qty"
                     id="qty"
-                    onChange={handlechange}
+                    value={Qty}
+                    onChange={(e) => setQty(e.target.value)}
                   />
                 </div>
               </div>
-              <button className="px-2 bg-blue-500 rounded h-[30px] hover:bg-blue-600 float-right mr-6 mt-3">
+              <button
+                onClick={tambahbarang}
+                className="px-2 bg-blue-500 rounded h-[30px] hover:bg-blue-600 float-right mr-6 mt-3"
+              >
                 Tambah
               </button>
             </div>
@@ -121,9 +147,9 @@ const Penjualan = () => {
               </h1>
             </div>
             <div className="">
-              <h1 className="font-bold text-blue-500 text-5xl text-center">
-                Rp. 500000
-              </h1>
+              <div className="font-bold text-blue-500 text-5xl text-center">
+                Rp. {sum}
+              </div>
             </div>
           </div>
           <div className="flex mt-6">
@@ -137,6 +163,7 @@ const Penjualan = () => {
                 type="number"
                 name="bayar"
                 id="bayar"
+                onChange={handlechange}
               />
             </div>
           </div>
@@ -146,12 +173,15 @@ const Penjualan = () => {
             </div>
             <div className="">
               <h1 className="font-bold text-blue-500 text-3xl text-center">
-                Rp. 500000
+                Rp. {bayar}
               </h1>
             </div>
           </div>
 
-          <button className="max-w-max float-right mt-14 px-3 h-[35px] bg-blue-500 text-white rounded hover:bg-blue-600">
+          <button
+            onClick={handletmbah}
+            className="max-w-max float-right mt-14 px-3 h-[35px] bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
             Buat Transaksi
           </button>
         </div>
@@ -163,6 +193,9 @@ const Penjualan = () => {
             <tr>
               <th scope="col" className="px-6 py-3">
                 Nama Barang
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Kode Barang
               </th>
               <th scope="col" className="px-6 py-3">
                 Qty
@@ -179,25 +212,29 @@ const Penjualan = () => {
             </tr>
           </thead>
           <tbody>
-            {dummybarang.map((data) => {
+            {cart.map((data) => {
               return (
-                <tr className="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
+                <tr
+                  key={data.data.id}
+                  className="bg-white border-b dark:bg-gray-900 dark:border-gray-700"
+                >
                   <th
                     scope="row"
                     className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                   >
-                    {data.nama}
+                    {data.data.nama_barang}
                   </th>
-                  <td className="px-6 py-4">2</td>
-                  <td className="px-6 py-4">{data.harga}</td>
-                  <td className="px-6 py-4">30000</td>
+                  <td className="px-6 py-4">{data.data.kode_barang}</td>
+                  <td className="px-6 py-4">{data.qty}</td>
+                  <td className="px-6 py-4">{data.data.harga_jual}</td>
+                  <td className="px-6 py-4">{data.semua}</td>
                   <td className="px-6 py-4">
-                    <a
-                      href="#"
+                    <p
+                      onClick={() => deletecart(data.data.id, data.semua)}
                       className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
                     >
                       Hapus
-                    </a>
+                    </p>
                   </td>
                 </tr>
               );
