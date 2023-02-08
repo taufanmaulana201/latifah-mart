@@ -28,6 +28,9 @@ const Pemesanan = () => {
   const barangku = useSelector((state) => state.barang.barang);
   const [filtered, setFiltered] = useState(null);
   const [terfilter, setTelfilter] = useState();
+  const [Qty, setQty] = useState(1);
+  const [cart, setCart] = useState([]);
+  const [Totaltransaksi, setTotaltransaksi] = useState([]);
   // console.log("pesanan", pesanan);
   // modal add controller
   let [isOpen, setIsOpen] = useState(false);
@@ -62,8 +65,21 @@ const Pemesanan = () => {
     );
     setTelfilter(filter);
   };
-  const tambahcart = (e) => {
-    e.preventdefault();
+  const tambahbarang = (e) => {
+    alert("p");
+    // e.preventDefault();
+    // terfilter &&
+    //   terfilter.map((data) => {
+    //     // setTotal(data.harga_jual * Qty);
+    //     const datayangditambahkan = {
+    //       data: data,
+    //       qty: Qty,
+    //       semua: data.harga_jual * Qty,
+    //     };
+    //     setCart((current) => [...current, datayangditambahkan]);
+    //     const harga = data.harga_jual * Qty;
+    //     setTotaltransaksi((current) => [...current, harga]);
+    //   });
   };
 
   const buattrasnsaksi = () => {
@@ -83,7 +99,7 @@ const Pemesanan = () => {
   useEffect(() => {
     dispatch(getpesanan());
   }, []);
-  console.log("filtered", filtered);
+  console.log("cart", cart);
   return (
     <div>
       <div className="flex items-center space-x-2">
@@ -325,12 +341,15 @@ const Pemesanan = () => {
                                 type="number"
                                 name="qty"
                                 id="qty"
-                                onChange={() => {}}
+                                value={Qty}
+                                onChange={(e) => {
+                                  setQty(e.target.value);
+                                }}
                               />
                             </div>
                           </div>
                           <button
-                            onclick={tambahcart}
+                            onclick={tambahbarang}
                             className="px-2 bg-blue-500 rounded h-[30px] hover:bg-blue-600 float-right mr-6 mt-3"
                           >
                             Tambah
@@ -411,63 +430,30 @@ const Pemesanan = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        <tr className="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
-                          <th
-                            scope="row"
-                            className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                          >
-                            Apple MacBook Pro 17"
-                          </th>
-                          <td className="px-6 py-4">Sliver</td>
-                          <td className="px-6 py-4">Laptop</td>
-                          <td className="px-6 py-4">$2999</td>
-                          <td className="px-6 py-4">
-                            <a
-                              href="#"
-                              className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                            >
-                              Hapus
-                            </a>
-                          </td>
-                        </tr>
-                        <tr className="border-b bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-                          <th
-                            scope="row"
-                            className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                          >
-                            Microsoft Surface Pro
-                          </th>
-                          <td className="px-6 py-4">White</td>
-                          <td className="px-6 py-4">Laptop PC</td>
-                          <td className="px-6 py-4">$1999</td>
-                          <td className="px-6 py-4">
-                            <a
-                              href="#"
-                              className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                            >
-                              Hapus
-                            </a>
-                          </td>
-                        </tr>
-                        <tr className="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
-                          <th
-                            scope="row"
-                            className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                          >
-                            Magic Mouse 2
-                          </th>
-                          <td className="px-6 py-4">Black</td>
-                          <td className="px-6 py-4">Accessories</td>
-                          <td className="px-6 py-4">$99</td>
-                          <td className="px-6 py-4">
-                            <a
-                              href="#"
-                              className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                            >
-                              Hapus
-                            </a>
-                          </td>
-                        </tr>
+                        {cart &&
+                          cart.map((data) => {
+                            return (
+                              <tr className="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
+                                <th
+                                  scope="row"
+                                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                >
+                                  Apple MacBook Pro 17"
+                                </th>
+                                <td className="px-6 py-4">Sliver</td>
+                                <td className="px-6 py-4">Laptop</td>
+                                <td className="px-6 py-4">$2999</td>
+                                <td className="px-6 py-4">
+                                  <a
+                                    href="#"
+                                    className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                                  >
+                                    Hapus
+                                  </a>
+                                </td>
+                              </tr>
+                            );
+                          })}
                       </tbody>
                     </table>
                   </div>

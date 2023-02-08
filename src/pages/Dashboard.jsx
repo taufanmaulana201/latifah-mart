@@ -60,7 +60,7 @@ const Dashboard = () => {
             </div>
             <p>Penjualan</p>
           </div>
-          <div
+          {/* <div
             onClick={() => setDashboardactive(1)}
             className={` flex px-2 h-8 items-center cursor-pointer ${
               dashboardactive === 1 ? "bg-slate-200" : ""
@@ -81,7 +81,7 @@ const Dashboard = () => {
               </svg>
             </div>
             <p>Pemesanan</p>
-          </div>
+          </div> */}
           <div
             onClick={() => setDashboardactive(2)}
             className={` flex px-2 h-8 items-center cursor-pointer ${

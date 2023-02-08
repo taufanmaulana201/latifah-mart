@@ -15,7 +15,6 @@ const Barang = () => {
   const dispatch = useDispatch();
   const { barang, detail } = useSelector((state) => state.barang);
   const mysuplier = useSelector((state) => state.suplier.suplier);
-  const navigate = useNavigate();
   const [formdata, setFormdata] = useState({
     kode_barang: "",
     nama_barang: "",
@@ -168,7 +167,7 @@ const Barang = () => {
                 stok barang
               </th>
               <th scope="col" className="px-6 py-3">
-                Catatan
+                Harga Jual
               </th>
               <th scope="col" className="px-6 py-3">
                 suplier

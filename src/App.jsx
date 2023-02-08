@@ -7,6 +7,7 @@ import Navbar from "./components/Navbar";
 import { Routes, Route } from "react-router-dom";
 import PrivateRoutes from "./ProtectRoutes";
 import { useSelector } from "react-redux";
+import ProtectRoute from "./utils/ProtectRoute";
 
 function App() {
   const [users, setUsers] = useState(null);
@@ -23,7 +24,9 @@ function App() {
     <div className="App">
       <Routes>
         <Route path="/" exact element={<Login />} />
-        <Route path="/dashboard" exact element={<Dashboard />} />
+        <Route element={<ProtectRoute />}>
+          <Route path="/dashboard" exact element={<Dashboard />} />
+        </Route>
       </Routes>
     </div>
   );

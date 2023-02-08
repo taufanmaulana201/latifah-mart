@@ -5,9 +5,12 @@ import { Dialog, Transition } from "@headlessui/react";
 
 const Laporan = () => {
   const dispatch = useDispatch();
+  const [opendate, setOpendate] = useState(false);
   const { laporan } = useSelector((state) => state.laporan);
-  const [length, setLength] = useState();
+  const [Short, setShort] = useState();
   const [details, setDetails] = useState();
+  const [today, setToday] = useState("");
+  const [sum, setSum] = useState([]);
 
   let [isOpen, setIsOpen] = useState(false);
   function closeModal() {
@@ -23,9 +26,44 @@ const Laporan = () => {
     openModal();
   };
 
+  const laporantoday =
+    laporan && laporan.filter((data) => data.tanggal_transaksi === today);
+
+  console.log("laporantoday", laporantoday);
+
+  let jmltransaksi = 0;
+  laporantoday.forEach((item) => {
+    jmltransaksi += item.total_transaksi;
+  });
+
+  console.log("jmltransaksi", jmltransaksi);
+
   useEffect(() => {
     dispatch(getlaporan());
   }, []);
+
+  useEffect(() => {
+    const dated = new Date();
+    const y = dated.getFullYear();
+    const m = dated.getMonth() + 1;
+    const d = dated.getDate();
+
+    if (d < 10) {
+      setToday(y + "-" + m + "-" + "0" + d);
+    }
+    if (m < 10) {
+      setToday(y + "-" + "0" + m + "-" + d);
+    }
+    if (m < 10 && d < 10) {
+      setToday(y + "-" + "0" + m + "-" + "0" + d);
+    } else {
+      setToday(y + "-" + m + "-" + d);
+    }
+  }, []);
+
+  const handletoday = (e) => {
+    setToday(e.target.value);
+  };
 
   return (
     <div>
@@ -44,6 +82,18 @@ const Laporan = () => {
         <div className="">
           <p className="font-semibold">Suplier Barang</p>
           <h1 className="text-3xl font-bold ">Latifah Busana</h1>
+        </div>
+      </div>
+      <div className="flex items-center w-full my-3">
+        <p className="mx-3">Filter</p>
+        <div className="w-[150px] h-[30px] bg-white rounded-sm flex items-center px-1">
+          <input
+            type="date"
+            name="date"
+            id="date"
+            value={today}
+            onChange={handletoday}
+          />
         </div>
       </div>
       <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -69,7 +119,7 @@ const Laporan = () => {
           </thead>
           <tbody>
             {laporan &&
-              laporan.map((data) => {
+              laporantoday.map((data) => {
                 return (
                   <tr class="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
                     <th
@@ -80,7 +130,7 @@ const Laporan = () => {
                     </th>
                     <td class="px-6 py-4">{data.jenis_transaksi}</td>
                     <td class="px-6 py-4">{data.tanggal_transaksi}</td>
-                    <td class="px-6 py-4">{data.total_transaksi}</td>
+                    <td class="px-6 py-4">Rp. {data.total_transaksi}</td>
                     <td class="px-6 py-4">
                       <p
                         onClick={() => detail(data.id)}
@@ -92,6 +142,15 @@ const Laporan = () => {
                   </tr>
                 );
               })}
+            <tr className="bg-slate-100">
+              <td colSpan={3} className="text-md font-semibold p-4 px-6">
+                Total Transaksi
+              </td>
+              <td className="text-md font-semibold p-4 px-6">
+                <p>Rp. {jmltransaksi}</p>
+              </td>
+              <td></td>
+            </tr>
           </tbody>
         </table>
       </div>
