@@ -33,6 +33,7 @@ export const addlaporan = (tgl, cart, sum, bayar) => {
       dispatch({
         type: ADD_LAPORAN,
       });
+      window.location.reload();
     } catch (e) {
       dispatch({
         type: LAPORAN_FAIL,

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addlaporan } from "../redux/actions/Laporan";
+import { useNavigate } from "react-router-dom";
 
 const Penjualan = () => {
   const dispatch = useDispatch();
@@ -50,10 +51,12 @@ const Penjualan = () => {
         setTotaltransaksi((current) => [...current, harga]);
       });
   };
+  // const navigate = useNavigate();
 
   const handletmbah = (e) => {
     dispatch(addlaporan(tgl, cart, sum, bayar));
     alert("transaksi berhasil");
+    // window.location.reload(true);
   };
 
   return (
@@ -132,7 +135,7 @@ const Penjualan = () => {
               </div>
               <button
                 onClick={tambahbarang}
-                className="px-2 bg-blue-500 rounded h-[30px] hover:bg-blue-600 float-right mr-6 mt-3"
+                className="px-2 bg-blue-500 text-white rounded h-[30px] hover:bg-blue-600 float-right mr-6 mt-3"
               >
                 Tambah
               </button>
